@@ -1,7 +1,6 @@
 #include "common.hpp"
 
-TEST(longest_match, empty_tree)
-{
+TEST(longest_match, empty_tree) {
     const std::vector<std::string> unique_keys = get_unique_keys();
     tree_t tree;
     for (const auto& key : unique_keys) {
@@ -10,8 +9,7 @@ TEST(longest_match, empty_tree)
     }
 }
 
-TEST(longest_match, complex_tree)
-{
+TEST(longest_match, complex_tree) {
     tree_t tree;
 
     tree["abcdef"] = 1;
@@ -37,28 +35,23 @@ TEST(longest_match, complex_tree)
     {
         SCOPED_TRACE("longest_match corrects typos in suffix");
         std::map<std::string, std::string> typos{
-        {"abcdefe", "abcdef"},
-        {"abcdegeasdf", "abcdege"},
-        {"bcdefege", "bcdef"},
-        {"ced", "ce"},
-        {"cdef", "cd"},
-        {"cf", "c"},
-        {"ca", "c"},
-        {"ccdef", "c"},
+            {"abcdefe", "abcdef"}, {"abcdegeasdf", "abcdege"},
+            {"bcdefege", "bcdef"}, {"ced", "ce"},
+            {"cdef", "cd"},        {"cf", "c"},
+            {"ca", "c"},           {"ccdef", "c"},
         };
-        for (const auto&[fst, snd] : typos) {
+        for (const auto& [fst, snd] : typos) {
             SCOPED_TRACE(fst);
             auto found_it = tree.longest_match(fst);
             ASSERT_NE(found_it, tree.end());
             ASSERT_EQ(snd, found_it->first);
-            ASSERT_EQ(tree[snd] , found_it->second);
+            ASSERT_EQ(tree[snd], found_it->second);
         }
     }
     {
         SCOPED_TRACE("should never be found");
-        const std::vector<std::string> should_never_be_found{
-            "a", "b", "d", "e", "f", "abcde", "bcdege", "acd", "bce", "acdef"
-        };
+        const std::vector<std::string> should_never_be_found{"a",     "b",      "d",   "e",   "f",
+                                                             "abcde", "bcdege", "acd", "bce", "acdef"};
         for (const auto& key : should_never_be_found) {
             SCOPED_TRACE(key);
             auto found_it = tree.longest_match(key);

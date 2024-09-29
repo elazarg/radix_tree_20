@@ -1,20 +1,19 @@
 #include "common.hpp"
 
-TEST(greedy_match, complex_tree)
-{
+TEST(greedy_match, complex_tree) {
     tree_t tree;
 
-    tree["apache"]    = 0;
-    tree["afford"]    = 1;
+    tree["apache"] = 0;
+    tree["afford"] = 1;
     tree["available"] = 2;
-    tree["affair"]    = 3;
-    tree["avenger"]   = 4;
-    tree["binary"]    = 5;
-    tree["bind"]      = 6;
-    tree["brother"]   = 7;
-    tree["brace"]     = 8;
-    tree["blind"]     = 9;
-    tree["bro"]       = 10;
+    tree["affair"] = 3;
+    tree["avenger"] = 4;
+    tree["binary"] = 5;
+    tree["bind"] = 6;
+    tree["brother"] = 7;
+    tree["brace"] = 8;
+    tree["blind"] = 9;
+    tree["bro"] = 10;
 
     {
         SCOPED_TRACE("greedy_match should find at least 1 object by existent key");
@@ -29,23 +28,21 @@ TEST(greedy_match, complex_tree)
     }
     {
         SCOPED_TRACE("greedy_match corrects typos");
-        typedef std::map<std::string, map_found_t > typos_t;
+        typedef std::map<std::string, map_found_t> typos_t;
         typos_t typos;
         {
             // build typos START
-            const std::vector<std::string> typos_vector{
-                // format: "typo,FOUND_1,FOUND_2,FOUND_N"
-                // if FOUND == * then FOUND treated as all keys in tree
-                "apple,apache",
-                "zzzzz,*",
-                ",*",
-                "lalalalala,*",
-                "avoid,available,avenger",
-                "bring,brace,bro,brother",
-                "biss,binary,bind",
-                "attack,affair,afford,apache,available,avenger"
-            };
-            for (const auto & i : typos_vector) {
+            const std::vector<std::string> typos_vector{// format: "typo,FOUND_1,FOUND_2,FOUND_N"
+                                                        // if FOUND == * then FOUND treated as all keys in tree
+                                                        "apple,apache",
+                                                        "zzzzz,*",
+                                                        ",*",
+                                                        "lalalalala,*",
+                                                        "avoid,available,avenger",
+                                                        "bring,brace,bro,brother",
+                                                        "biss,binary,bind",
+                                                        "attack,affair,afford,apache,available,avenger"};
+            for (const auto& i : typos_vector) {
                 std::vector<std::string> elems;
                 std::stringstream ss(i);
                 std::string item;
@@ -55,7 +52,7 @@ TEST(greedy_match, complex_tree)
                 }
                 map_found_t map_found;
                 if (elems.size() == 2 && elems[1] == "*") {
-                    for (auto &[fst, snd] : tree) {
+                    for (auto& [fst, snd] : tree) {
                         map_found[fst] = snd;
                     }
                 } else {
@@ -64,11 +61,11 @@ TEST(greedy_match, complex_tree)
                         map_found[key] = tree[key];
                     }
                 }
-                typos[ elems[0] ] = map_found;
+                typos[elems[0]] = map_found;
             }
             // build typos END
         }
-        
+
         for (auto typo = typos.begin(); typo != typos.end(); ++typo) {
             SCOPED_TRACE(typo->first);
             vector_found_t vec;

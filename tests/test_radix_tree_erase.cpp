@@ -1,8 +1,7 @@
 
 #include "common.hpp"
 
-TEST(erase, change_size)
-{
+TEST(erase, change_size) {
     auto randeng = std::default_random_engine();
     std::vector<std::string> unique_keys = get_unique_keys();
     for (size_t i = 0; i < unique_keys.size(); i++) {
@@ -10,7 +9,7 @@ TEST(erase, change_size)
         { // fill tree with some data
             std::ranges::shuffle(unique_keys, randeng);
             for (const auto& key : unique_keys) {
-                 tree.insert( tree_t::value_type(key, randeng()%100) );
+                tree.insert(tree_t::value_type(key, randeng() % 100));
             }
         }
         {
@@ -26,8 +25,7 @@ TEST(erase, change_size)
     }
 }
 
-TEST(erase, success_if_key_exist_fail_if_no_such_key)
-{
+TEST(erase, success_if_key_exist_fail_if_no_such_key) {
     auto randeng = std::default_random_engine();
     std::vector<std::string> unique_keys = get_unique_keys();
     for (size_t i = 0; i < unique_keys.size(); i++) {
@@ -43,7 +41,7 @@ TEST(erase, success_if_key_exist_fail_if_no_such_key)
         { // fill tree with some data
             std::ranges::shuffle(unique_keys, randeng);
             for (const auto& key : unique_keys) {
-                tree.insert( tree_t::value_type(key, randeng()%100) );
+                tree.insert(tree_t::value_type(key, randeng() % 100));
             }
         }
         {
@@ -64,8 +62,7 @@ TEST(erase, success_if_key_exist_fail_if_no_such_key)
     }
 }
 
-TEST(erase, not_greedy)
-{
+TEST(erase, not_greedy) {
     tree_t tree;
     tree["bro"] = 1;
     tree["brother"] = 2;
@@ -90,8 +87,7 @@ TEST(erase, not_greedy)
     }
 }
 
-TEST(erase, empty_key)
-{
+TEST(erase, empty_key) {
     auto randeng = std::default_random_engine();
     {
         SCOPED_TRACE("tree contains only empty key");
@@ -108,7 +104,7 @@ TEST(erase, empty_key)
         { // fill tree with some data
             std::ranges::shuffle(unique_keys, randeng);
             for (const auto& key : unique_keys) {
-                tree.insert( tree_t::value_type(key, randeng()%100) );
+                tree.insert(tree_t::value_type(key, randeng() % 100));
             }
         }
 

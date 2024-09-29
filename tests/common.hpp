@@ -1,8 +1,8 @@
 #pragma once
 
-#include <random>
 #include <algorithm>
 #include <map>
+#include <random>
 
 #include <gtest/gtest.h>
 #include <radix_tree.hpp>
@@ -14,10 +14,8 @@ using vector_found_t = std::vector<tree_t::iterator>;
 using map_found_t = std::map<std::string, int>;
 
 inline std::vector<std::string> get_unique_keys() {
-    std::vector<std::string> vec{
-        "a", "b", "ab", "ba", "aa", "bb",
-        "aaa", "aab", "aba", "baa", "bba", "bab", "abb", "bbb"
-    };
+    std::vector<std::string> vec{"a",   "b",   "ab",  "ba",  "aa",  "bb",  "aaa",
+                                 "aab", "aba", "baa", "bba", "bab", "abb", "bbb"};
     std::ranges::sort(vec);
     EXPECT_TRUE(std::ranges::adjacent_find(vec) == vec.end());
     return vec;

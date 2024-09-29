@@ -1,7 +1,6 @@
 #include "common.hpp"
 
-TEST(insert, change_size)
-{
+TEST(insert, change_size) {
     auto randeng = std::default_random_engine();
     std::vector<std::string> unique_keys = get_unique_keys();
     for (size_t i = 0; i < unique_keys.size(); i++) {
@@ -11,37 +10,35 @@ TEST(insert, change_size)
             for (size_t j = 0; j < unique_keys.size(); j++) {
                 const std::string& key = unique_keys[j];
                 ASSERT_EQ(j, tree.size());
-                tree.insert( tree_t::value_type(key, randeng()%100) );
-                ASSERT_EQ(j+1, tree.size());
+                tree.insert(tree_t::value_type(key, randeng() % 100));
+                ASSERT_EQ(j + 1, tree.size());
             }
         }
         { // try to insert with duplicate keys
             std::ranges::shuffle(unique_keys, randeng);
-            for (const auto& key:  unique_keys) {
+            for (const auto& key : unique_keys) {
                 ASSERT_EQ(unique_keys.size(), tree.size());
-                tree.insert( tree_t::value_type(key, randeng()%100) );
+                tree.insert(tree_t::value_type(key, randeng() % 100));
                 ASSERT_EQ(unique_keys.size(), tree.size());
             }
         }
     }
 }
 
-TEST(insert, success_if_key_unique)
-{
+TEST(insert, success_if_key_unique) {
     auto randeng = std::default_random_engine();
     std::vector<std::string> unique_keys = get_unique_keys();
     for (size_t i = 0; i < unique_keys.size(); i++) {
         tree_t tree;
         std::ranges::shuffle(unique_keys, randeng);
         for (const auto& key : unique_keys) {
-            std::pair<tree_t::iterator, bool> r = tree.insert( tree_t::value_type(key, randeng()%100) );
-            ASSERT_TRUE( r.second ) << "fail to insert key=" << key;
+            std::pair<tree_t::iterator, bool> r = tree.insert(tree_t::value_type(key, randeng() % 100));
+            ASSERT_TRUE(r.second) << "fail to insert key=" << key;
         }
     }
 }
 
-TEST(insert, fail_if_key_duplicate)
-{
+TEST(insert, fail_if_key_duplicate) {
     auto randeng = std::default_random_engine();
     std::vector<std::string> unique_keys = get_unique_keys();
     for (size_t i = 0; i < unique_keys.size(); i++) {
@@ -49,21 +46,20 @@ TEST(insert, fail_if_key_duplicate)
         { // fill tree with some data
             std::ranges::shuffle(unique_keys, randeng);
             for (const auto& key : unique_keys) {
-                tree.insert( tree_t::value_type(key, randeng()%100) );
+                tree.insert(tree_t::value_type(key, randeng() % 100));
             }
         }
         { // try to insert with duplicate keys
             std::ranges::shuffle(unique_keys, randeng);
             for (const auto& key : unique_keys) {
-                std::pair<tree_t::iterator, bool> r = tree.insert( tree_t::value_type(key, randeng()%100) );
-                ASSERT_FALSE( r.second ) << "unexpectedly inserted key=" << key;
+                std::pair<tree_t::iterator, bool> r = tree.insert(tree_t::value_type(key, randeng() % 100));
+                ASSERT_FALSE(r.second) << "unexpectedly inserted key=" << key;
             }
         }
     }
 }
 
-TEST(insert, dont_replace_prev_value)
-{
+TEST(insert, dont_replace_prev_value) {
     auto randeng = std::default_random_engine();
     std::vector<std::string> unique_keys = get_unique_keys();
     for (size_t i = 0; i < unique_keys.size(); i++) {
@@ -72,15 +68,15 @@ TEST(insert, dont_replace_prev_value)
         { // fill tree with some data and save values in map
             std::ranges::shuffle(unique_keys, randeng);
             for (const auto& key : unique_keys) {
-                int value = randeng()%100;
-                tree.insert( tree_t::value_type(key, value) );
-                value_map[key]=value;
+                int value = randeng() % 100;
+                tree.insert(tree_t::value_type(key, value));
+                value_map[key] = value;
             }
         }
         { // try to overwrite by key
             std::ranges::shuffle(unique_keys, randeng);
             for (const auto& key : unique_keys) {
-                tree.insert( tree_t::value_type(key, randeng()%100) );\
+                tree.insert(tree_t::value_type(key, randeng() % 100));
             }
         }
         { // check old data was not modified
@@ -93,27 +89,25 @@ TEST(insert, dont_replace_prev_value)
     }
 }
 
-TEST(insert, operator_index_call_default_ctor)
-{
+TEST(insert, operator_index_call_default_ctor) {
     auto randeng = std::default_random_engine();
     std::vector<std::string> unique_keys = get_unique_keys();
     std::ranges::shuffle(unique_keys, randeng);
     tree_t tree;
-    for (const auto & unique_key : unique_keys) {
+    for (const auto& unique_key : unique_keys) {
         ASSERT_EQ(0, tree[unique_key]);
     }
 }
 
-TEST(insert, after_erase)
-{
+TEST(insert, after_erase) {
     auto randeng = std::default_random_engine();
     std::vector<std::string> unique_keys = get_unique_keys();
     std::ranges::shuffle(unique_keys, randeng);
     tree_t tree;
     for (const auto& key : unique_keys) {
-        tree.insert( tree_t::value_type(key, randeng()%100) );
+        tree.insert(tree_t::value_type(key, randeng() % 100));
         tree.erase(key);
-        auto [fst, snd] = tree.insert( tree_t::value_type(key, randeng()%100) );
+        auto [fst, snd] = tree.insert(tree_t::value_type(key, randeng() % 100));
         ASSERT_TRUE(snd);
     }
 }

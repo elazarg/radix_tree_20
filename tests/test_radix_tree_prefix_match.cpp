@@ -5,12 +5,9 @@ bool is_prefix_of(const std::string& prefix, const std::string& str) {
     return fst == prefix.end();
 }
 
-void check_nonexistent_prefixes(tree_t& tree)
-{
+void check_nonexistent_prefixes(tree_t& tree) {
     SCOPED_TRACE("should never be found");
-    const std::vector<std::string> should_never_be_found{
-        "abcdfe", "abcdefe", "abe", "cc", "abcdec", "bcdefc"
-    };
+    const std::vector<std::string> should_never_be_found{"abcdfe", "abcdefe", "abe", "cc", "abcdec", "bcdefc"};
     for (const auto& key : should_never_be_found) {
         SCOPED_TRACE(key);
         vector_found_t vec;
@@ -19,14 +16,12 @@ void check_nonexistent_prefixes(tree_t& tree)
     }
 }
 
-TEST(prefix_match, empty_tree)
-{
+TEST(prefix_match, empty_tree) {
     tree_t tree;
     check_nonexistent_prefixes(tree);
 }
 
-TEST(prefix_match, complex_tree)
-{
+TEST(prefix_match, complex_tree) {
     tree_t tree;
 
     tree["abcdef"] = 1;
@@ -53,7 +48,7 @@ TEST(prefix_match, complex_tree)
         vector_found_t vec;
         tree.prefix_match("", vec);
         map_found_t should_be_found;
-        for (auto &[fst, snd] : tree) {
+        for (auto& [fst, snd] : tree) {
             should_be_found[fst] = snd;
         }
         ASSERT_EQ(should_be_found, vec_found_to_map(vec));
@@ -69,13 +64,15 @@ TEST(prefix_match, complex_tree)
                 for (size_t i = 0; i < key.size(); i++) {
                     const std::string prefix = key.substr(0, i);
 
-                    if (prefixes.contains(prefix))
+                    if (prefixes.contains(prefix)) {
                         continue; // we should not build prefixes if we have done it before
+                    }
 
                     vector_found_t vec;
                     for (auto each_it = tree.begin(); each_it != tree.end(); ++each_it) {
-                        if ( is_prefix_of(prefix, each_it->first) )
+                        if (is_prefix_of(prefix, each_it->first)) {
                             vec.push_back(each_it);
+                        }
                     }
                     prefixes[prefix] = vec_found_to_map(vec);
                 }

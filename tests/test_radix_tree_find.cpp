@@ -1,7 +1,6 @@
 #include "common.hpp"
 
-TEST(find, nothing_in_empty)
-{
+TEST(find, nothing_in_empty) {
     std::vector<std::string> unique_keys = get_unique_keys();
     tree_t tree;
     for (const auto& key : unique_keys) {
@@ -10,8 +9,7 @@ TEST(find, nothing_in_empty)
     }
 }
 
-TEST(find, find_after_insert_or_erase)
-{
+TEST(find, find_after_insert_or_erase) {
     auto randeng = std::default_random_engine();
     std::vector<std::string> unique_keys = get_unique_keys();
     for (size_t i = 0; i < unique_keys.size(); i++) {
@@ -20,9 +18,9 @@ TEST(find, find_after_insert_or_erase)
         { // fill tree with some data and save values in map
             std::ranges::shuffle(unique_keys, randeng);
             for (const auto& key : unique_keys) {
-                int value = randeng()%100;
-                tree.insert( tree_t::value_type(key, value) );
-                value_map[key]=value;
+                int value = randeng() % 100;
+                tree.insert(tree_t::value_type(key, value));
+                value_map[key] = value;
             }
         }
         {
