@@ -13,7 +13,7 @@ It's a header-only library. Just include it. See [examples](examples/).
 
 Develop
 =====
-Requirements: any C++98 compiler (`g++` or `clang++`), `cmake`
+Requirements: any C++20 compiler (`g++` or `clang++`), `cmake`
 
 ```
 ~/radix_tree $ mkdir build && cd build
