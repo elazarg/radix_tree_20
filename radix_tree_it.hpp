@@ -14,7 +14,7 @@ class radix_tree_it {
 
   public:
     // Iterator traits
-    using iterator_category = std::forward_iterator_tag; // or appropriate category
+    using iterator_category = std::forward_iterator_tag;
     using value_type = std::pair<std::pair<const K, T>, T>;
     using difference_type = std::ptrdiff_t;
     using pointer = value_type*;
@@ -22,10 +22,7 @@ class radix_tree_it {
 
     radix_tree_it() : m_pointee(nullptr) {}
     radix_tree_it(const radix_tree_it& r) : m_pointee(r.m_pointee) {}
-    radix_tree_it& operator=(const radix_tree_it& r) {
-        m_pointee = r.m_pointee;
-        return *this;
-    }
+    radix_tree_it& operator=(const radix_tree_it& r) = default;
     ~radix_tree_it() = default;
 
     std::pair<const K, T>& operator*() const;
@@ -39,7 +36,7 @@ class radix_tree_it {
 
   private:
     radix_tree_node<K, T, Compare>* m_pointee;
-    radix_tree_it(radix_tree_node<K, T, Compare>* p) : m_pointee(p) {}
+    explicit radix_tree_it(radix_tree_node<K, T, Compare>* p) : m_pointee(p) {}
 
     radix_tree_node<K, T, Compare>* increment(radix_tree_node<K, T, Compare>* node) const;
     radix_tree_node<K, T, Compare>* descend(radix_tree_node<K, T, Compare>* node) const;

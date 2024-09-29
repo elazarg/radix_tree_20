@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <functional>
+#include <memory>
 #include <string>
 #include <utility>
 #include <vector>
@@ -42,11 +43,11 @@ class radix_tree {
     typedef radix_tree_it<K, T, Compare> iterator;
     typedef std::size_t size_type;
 
-    radix_tree() : m_size(0), m_root(nullptr), m_predicate(Compare()) {}
+    radix_tree() = default;
 
-    explicit radix_tree(Compare pred) : m_size(0), m_root(nullptr), m_predicate(pred) {}
+    explicit radix_tree(Compare pred) : m_predicate(pred) {}
 
-    ~radix_tree() { delete m_root; }
+    ~radix_tree() = default;
 
     [[nodiscard]]
     size_type size() const {
@@ -59,8 +60,7 @@ class radix_tree {
     }
 
     void clear() {
-        delete m_root;
-        m_root = nullptr;
+        m_root.reset();
         m_size = 0;
     }
 
@@ -101,10 +101,11 @@ class radix_tree {
     radix_tree& operator=(radix_tree other) = delete;
 
   private:
-    size_type m_size;
-    radix_tree_node<K, T, Compare>* m_root;
+    size_type m_size{};
+    std::unique_ptr<radix_tree_node<K, T, Compare>> m_root{};
+    radix_tree_node<K, T, Compare>* root() { return m_root.get(); }
 
-    Compare m_predicate;
+    Compare m_predicate{};
 
     radix_tree_node<K, T, Compare>* begin(radix_tree_node<K, T, Compare>* node);
 
@@ -121,13 +122,13 @@ template <typename K, typename T, typename Compare>
 void radix_tree<K, T, Compare>::prefix_match(const K& key, std::vector<iterator>& vec) {
     vec.clear();
 
-    if (m_root == nullptr) {
+    if (!m_root) {
         return;
     }
 
     K key_sub1, key_sub2;
 
-    radix_tree_node<K, T, Compare>* node = find_node(key, m_root, 0);
+    radix_tree_node<K, T, Compare>* node = find_node(key, root(), 0);
 
     if (node->m_is_leaf) {
         node = node->m_parent;
@@ -146,13 +147,13 @@ void radix_tree<K, T, Compare>::prefix_match(const K& key, std::vector<iterator>
 
 template <typename K, typename T, typename Compare>
 typename radix_tree<K, T, Compare>::iterator radix_tree<K, T, Compare>::longest_match(const K& key) {
-    if (m_root == nullptr) {
+    if (!m_root) {
         return iterator(nullptr);
     }
 
     K key_sub;
 
-    radix_tree_node<K, T, Compare>* node = find_node(key, m_root, 0);
+    radix_tree_node<K, T, Compare>* node = find_node(key, root(), 0);
 
     if (node->m_is_leaf) {
         return iterator(node);
@@ -189,10 +190,10 @@ template <typename K, typename T, typename Compare>
 typename radix_tree<K, T, Compare>::iterator radix_tree<K, T, Compare>::begin() {
     radix_tree_node<K, T, Compare>* node;
 
-    if (m_root == nullptr || m_size == 0) {
+    if (!m_root || m_size == 0) {
         node = nullptr;
     } else {
-        node = begin(m_root);
+        node = begin(root());
     }
 
     return iterator(node);
@@ -230,11 +231,11 @@ template <typename K, typename T, typename Compare>
 void radix_tree<K, T, Compare>::greedy_match(const K& key, std::vector<iterator>& vec) {
     vec.clear();
 
-    if (m_root == nullptr) {
+    if (!m_root) {
         return;
     }
 
-    radix_tree_node<K, T, Compare>* node = find_node(key, m_root, 0);
+    radix_tree_node<K, T, Compare>* node = find_node(key, root(), 0);
 
     if (node->m_is_leaf) {
         node = node->m_parent;
@@ -264,14 +265,14 @@ void radix_tree<K, T, Compare>::erase(iterator it) {
 
 template <typename K, typename T, typename Compare>
 bool radix_tree<K, T, Compare>::erase(const K& key) {
-    if (m_root == nullptr) {
+    if (!m_root) {
         return false;
     }
 
     radix_tree_node<K, T, Compare>* grandparent;
     K nul = radix_substr(key, 0, 0);
 
-    radix_tree_node<K, T, Compare>* child = find_node(key, m_root, 0);
+    radix_tree_node<K, T, Compare>* child = find_node(key, root(), 0);
 
     if (!child->m_is_leaf) {
         return false;
@@ -284,7 +285,7 @@ bool radix_tree<K, T, Compare>::erase(const K& key) {
 
     m_size--;
 
-    if (parent == m_root) {
+    if (parent == root()) {
         return true;
     }
 
@@ -300,7 +301,7 @@ bool radix_tree<K, T, Compare>::erase(const K& key) {
         grandparent = parent;
     }
 
-    if (grandparent == m_root) {
+    if (grandparent == root()) {
         return true;
     }
 
@@ -435,39 +436,39 @@ radix_tree_node<K, T, Compare>* radix_tree<K, T, Compare>::prepend(radix_tree_no
 
 template <typename K, typename T, typename Compare>
 std::pair<typename radix_tree<K, T, Compare>::iterator, bool> radix_tree<K, T, Compare>::insert(const value_type& val) {
-    if (m_root == nullptr) {
+    if (!m_root) {
         K nul = radix_substr(val.first, 0, 0);
 
-        m_root = new radix_tree_node<K, T, Compare>(m_predicate);
+        m_root.reset(new radix_tree_node<K, T, Compare>(m_predicate));
         m_root->m_key = nul;
     }
 
-    radix_tree_node<K, T, Compare>* node = find_node(val.first, m_root, 0);
+    radix_tree_node<K, T, Compare>* node = find_node(val.first, root(), 0);
 
     if (node->m_is_leaf) {
-        return std::pair<iterator, bool>(node, false);
+        return std::pair<iterator, bool>(iterator{node}, false);
     }
-    if (node == m_root) {
+    if (node == root()) {
         m_size++;
-        return std::pair<iterator, bool>(append(m_root, val), true);
+        return std::pair<iterator, bool>(iterator{append(root(), val)}, true);
     }
     m_size++;
     int len = radix_length(node->m_key);
     K key_sub = radix_substr(val.first, node->m_depth, len);
 
     if (key_sub == node->m_key) {
-        return std::pair<iterator, bool>(append(node, val), true);
+        return std::pair<iterator, bool>(iterator{append(node, val)}, true);
     }
-    return std::pair<iterator, bool>(prepend(node, val), true);
+    return std::pair<iterator, bool>(iterator{prepend(node, val)}, true);
 }
 
 template <typename K, typename T, typename Compare>
 typename radix_tree<K, T, Compare>::iterator radix_tree<K, T, Compare>::find(const K& key) {
-    if (m_root == nullptr) {
+    if (!m_root) {
         return iterator(nullptr);
     }
 
-    radix_tree_node<K, T, Compare>* node = find_node(key, m_root, 0);
+    radix_tree_node<K, T, Compare>* node = find_node(key, root(), 0);
 
     // if the node is a internal node, return nullptr
     if (!node->m_is_leaf) {
