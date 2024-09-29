@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.4)
+cmake_minimum_required(VERSION 3.10)
 
 project(radix-tree)
 
@@ -6,10 +6,18 @@ set (CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 install(FILES radix_tree.hpp radix_tree_it.hpp radix_tree_node.hpp DESTINATION include/radix_tree)
 
 # warnings disabled only for gtest headers (googletest is not perfect...)
-set (gtest_no_warnings_headers "-Wno-long-long -Wno-variadic-macros -Wno-c++11-long-long")
+set (gtest_no_warnings_headers "-Wno-long-long -Wno-variadic-macros")
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic -Wall -Wextra -Werror ${gtest_no_warnings_headers}")
 
 option(BUILD_TESTS "Should we build tests?" OFF)
+
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR
+        "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    set(CMAKE_CXX_STANDARD 20)
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++20")
+endif ()
+
 
 if (BUILD_TESTS)
     enable_testing()

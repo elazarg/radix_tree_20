@@ -33,7 +33,7 @@ TEST(greedy_match, complex_tree)
         typos_t typos;
         {
             // build typos START
-            const std::string typos_strings[] = {
+            const std::vector<std::string> typos_vector{
                 // format: "typo,FOUND_1,FOUND_2,FOUND_N"
                 // if FOUND == * then FOUND treated as all keys in tree
                 "apple,apache",
@@ -45,10 +45,9 @@ TEST(greedy_match, complex_tree)
                 "biss,binary,bind",
                 "attack,affair,afford,apache,available,avenger"
             };
-            std::vector<std::string> typos_vector = make_vector(typos_strings);
-            for (size_t i = 0; i < typos_vector.size(); i++) {
+            for (const auto & i : typos_vector) {
                 std::vector<std::string> elems;
-                std::stringstream ss(typos_vector[i]);
+                std::stringstream ss(i);
                 std::string item;
                 while (std::getline(ss, item, ',')) {
                     elems.push_back(item);
@@ -56,12 +55,12 @@ TEST(greedy_match, complex_tree)
                 }
                 map_found_t map_found;
                 if (elems.size() == 2 && elems[1] == "*") {
-                    for (tree_t::iterator it = tree.begin(); it != tree.end(); ++it) {
-                        map_found[it->first] = it->second;
+                    for (auto &[fst, snd] : tree) {
+                        map_found[fst] = snd;
                     }
                 } else {
                     for (size_t j = 1 /* skip the first elem*/; j < elems.size(); j++) {
-                        const std::string key = elems[j];
+                        const std::string& key = elems[j];
                         map_found[key] = tree[key];
                     }
                 }
@@ -70,7 +69,7 @@ TEST(greedy_match, complex_tree)
             // build typos END
         }
         
-        for (typos_t::const_iterator typo = typos.begin(); typo != typos.end(); ++typo) {
+        for (auto typo = typos.begin(); typo != typos.end(); ++typo) {
             SCOPED_TRACE(typo->first);
             vector_found_t vec;
             tree.greedy_match(typo->first, vec);

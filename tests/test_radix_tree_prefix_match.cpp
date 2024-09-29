@@ -1,19 +1,17 @@
 #include "common.hpp"
 
 bool is_prefix_of(const std::string& prefix, const std::string& str) {
-    std::pair<std::string::const_iterator, std::string::const_iterator> p = std::mismatch(prefix.begin(), prefix.end(), str.begin());
-    return p.first == prefix.end();
+    auto [fst, snd] = std::mismatch(prefix.begin(), prefix.end(), str.begin());
+    return fst == prefix.end();
 }
 
 void check_nonexistent_prefixes(tree_t& tree)
 {
     SCOPED_TRACE("should never be found");
-    const std::string never_found_strings[] = {
+    const std::vector<std::string> should_never_be_found{
         "abcdfe", "abcdefe", "abe", "cc", "abcdec", "bcdefc"
     };
-    std::vector<std::string> should_never_be_found = make_vector(never_found_strings);
-    for (size_t i = 0; i < should_never_be_found.size(); i++) {
-        const std::string key = should_never_be_found[i];
+    for (const auto& key : should_never_be_found) {
         SCOPED_TRACE(key);
         vector_found_t vec;
         tree.prefix_match(key, vec);
@@ -41,7 +39,7 @@ TEST(prefix_match, complex_tree)
 
     {
         SCOPED_TRACE("prefix_match should find at least 1 object by existent key");
-        for (tree_t::iterator it = tree.begin(); it != tree.end(); ++it) {
+        for (auto it = tree.begin(); it != tree.end(); ++it) {
             vector_found_t vec;
             tree.prefix_match(it->first, vec);
             ASSERT_GE(vec.size(), 1u);
@@ -55,8 +53,8 @@ TEST(prefix_match, complex_tree)
         vector_found_t vec;
         tree.prefix_match("", vec);
         map_found_t should_be_found;
-        for (tree_t::iterator it = tree.begin(); it != tree.end(); ++it) {
-            should_be_found[it->first] = it->second;
+        for (auto &[fst, snd] : tree) {
+            should_be_found[fst] = snd;
         }
         ASSERT_EQ(should_be_found, vec_found_to_map(vec));
     }
@@ -66,16 +64,16 @@ TEST(prefix_match, complex_tree)
         {
             // build prefixes START
             // iterate over each key in tree, make prefixes from it: prefix = key[0..N], N <- [0 .. lenght key]
-            for (tree_t::iterator it = tree.begin(); it != tree.end(); ++it) {
+            for (auto it = tree.begin(); it != tree.end(); ++it) {
                 const std::string key = it->first;
                 for (size_t i = 0; i < key.size(); i++) {
                     const std::string prefix = key.substr(0, i);
 
-                    if (prefixes.find(prefix) != prefixes.end())
+                    if (prefixes.contains(prefix))
                         continue; // we should not build prefixes if we have done it before
 
                     vector_found_t vec;
-                    for (tree_t::iterator each_it = tree.begin(); each_it != tree.end(); ++each_it) {
+                    for (auto each_it = tree.begin(); each_it != tree.end(); ++each_it) {
                         if ( is_prefix_of(prefix, each_it->first) )
                             vec.push_back(each_it);
                     }
@@ -85,7 +83,7 @@ TEST(prefix_match, complex_tree)
             // build prefixes END
         }
 
-        for (prefixes_t::const_iterator prefix_it = prefixes.begin(); prefix_it != prefixes.end(); ++prefix_it) {
+        for (auto prefix_it = prefixes.begin(); prefix_it != prefixes.end(); ++prefix_it) {
             SCOPED_TRACE(prefix_it->first);
             vector_found_t vec;
             tree.prefix_match(prefix_it->first, vec);

@@ -1,7 +1,5 @@
-#ifndef RADIX_TREE_IT
-#define RADIX_TREE_IT
+#pragma once
 
-#include <iterator>
 #include <functional>
 
 // forward declaration
@@ -9,23 +7,30 @@ template <typename K, typename T, class Compare = std::less<K> > class radix_tre
 template <typename K, typename T, class Compare = std::less<K> > class radix_tree_node;
 
 template <typename K, typename T, class Compare = std::less<K> >
-class radix_tree_it : public std::iterator<std::forward_iterator_tag, std::pair<K, T> > {
+class radix_tree_it {
     friend class radix_tree<K, T, Compare>;
 
 public:
-    radix_tree_it() : m_pointee(0) { }
+    // Iterator traits
+    using iterator_category = std::forward_iterator_tag;  // or appropriate category
+    using value_type = std::pair<std::pair<const K, T>, T>;
+    using difference_type = std::ptrdiff_t;
+    using pointer = value_type*;
+    using reference = value_type&;
+
+    radix_tree_it() : m_pointee(nullptr) { }
     radix_tree_it(const radix_tree_it& r) : m_pointee(r.m_pointee) { }
     radix_tree_it& operator=(const radix_tree_it& r) { m_pointee = r.m_pointee; return *this; }
-    ~radix_tree_it() { }
+    ~radix_tree_it() = default;
 
     std::pair<const K, T>& operator*  () const;
     std::pair<const K, T>* operator-> () const;
-    const radix_tree_it<K, T, Compare>& operator++ ();
-    radix_tree_it<K, T, Compare> operator++ (int);
-    // const radix_tree_it<K, T, Compare>& operator-- ();
-    bool operator!= (const radix_tree_it<K, T, Compare> &lhs) const;
-    bool operator== (const radix_tree_it<K, T, Compare> &lhs) const;
+    const radix_tree_it& operator++ ();
+    radix_tree_it operator++ (int);
 
+    // const radix_tree_it& operator-- ();
+    bool operator!= (const radix_tree_it &lhs) const;
+    bool operator== (const radix_tree_it &lhs) const;
 private:
     radix_tree_node<K, T, Compare> *m_pointee;
     radix_tree_it(radix_tree_node<K, T, Compare> *p) : m_pointee(p) { }
@@ -39,8 +44,8 @@ radix_tree_node<K, T, Compare>* radix_tree_it<K, T, Compare>::increment(radix_tr
 {
 	radix_tree_node<K, T, Compare>* parent = node->m_parent;
 
-    if (parent == NULL)
-        return NULL;
+    if (parent == nullptr)
+        return nullptr;
 
     typename radix_tree_node<K, T, Compare>::it_child it = parent->m_children.find(node->m_key);
     assert(it != parent->m_children.end());
@@ -48,8 +53,7 @@ radix_tree_node<K, T, Compare>* radix_tree_it<K, T, Compare>::increment(radix_tr
 
     if (it == parent->m_children.end())
         return increment(parent);
-    else
-        return descend(it->second);
+    return descend(it->second);
 }
 
 template <typename K, typename T, typename Compare>
@@ -78,13 +82,13 @@ std::pair<const K, T>* radix_tree_it<K, T, Compare>::operator-> () const
 }
 
 template <typename K, typename T, typename Compare>
-bool radix_tree_it<K, T, Compare>::operator!= (const radix_tree_it<K, T, Compare> &lhs) const
+bool radix_tree_it<K, T, Compare>::operator!= (const radix_tree_it &lhs) const
 {
     return m_pointee != lhs.m_pointee;
 }
 
 template <typename K, typename T, typename Compare>
-bool radix_tree_it<K, T, Compare>::operator== (const radix_tree_it<K, T, Compare> &lhs) const
+bool radix_tree_it<K, T, Compare>::operator== (const radix_tree_it &lhs) const
 {
     return m_pointee == lhs.m_pointee;
 }
@@ -92,7 +96,7 @@ bool radix_tree_it<K, T, Compare>::operator== (const radix_tree_it<K, T, Compare
 template <typename K, typename T, typename Compare>
 const radix_tree_it<K, T, Compare>& radix_tree_it<K, T, Compare>::operator++ ()
 {
-    if (m_pointee != NULL) // it is undefined behaviour to dereference iterator that is out of bounds...
+    if (m_pointee != nullptr) // it is undefined behaviour to dereference iterator that is out of bounds...
         m_pointee = increment(m_pointee);
     return *this;
 }
@@ -100,19 +104,7 @@ const radix_tree_it<K, T, Compare>& radix_tree_it<K, T, Compare>::operator++ ()
 template <typename K, typename T, typename Compare>
 radix_tree_it<K, T, Compare> radix_tree_it<K, T, Compare>::operator++ (int)
 {
-    radix_tree_it<K, T, Compare> copy(*this);
+    radix_tree_it copy(*this);
     ++(*this);
     return copy;
 }
-
-/*
-template <typename K, typename T>
-const radix_tree_it<K, T, Compare>& radix_tree_it<K, T, Compare>::operator-- ()
-{
-    assert(m_pointee != NULL);
-
-    return *this;
-}
-*/
-
-#endif // RADIX_TREE_IT

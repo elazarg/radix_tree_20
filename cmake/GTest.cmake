@@ -25,7 +25,7 @@ function(add_gtest_as_external)
 
 
     # warnings disabled only for gtest sources (googletest is not perfect...)
-    set (gtest_no_warnings_sources "-Wno-missing-field-initializers -Wno-unused-private-field")
+    set (gtest_no_warnings_sources "-Wno-missing-field-initializers")
     set (gtest_cxx_flags "${CMAKE_CXX_FLAGS} ${gtest_no_warnings_sources}")
 
     ExternalProject_Add(
